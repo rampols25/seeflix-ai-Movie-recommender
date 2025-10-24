@@ -1,90 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SEEFLIX AI Recommender</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-    }
-    h1 {
-      color: #e50914;
-    }
-    input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background-color: #e50914;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #response {
-      margin-top: 20px;
-      width: 80%;
-      background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 10px;
-      min-height: 50px;
-    }
-  </style>
-</head>
-<body>
-  <h1>SEEFLIX AI Recommender 🎬</h1>
-  <input type="text" id="userInput" placeholder="Type what you feel like watching..." />
-  <button onclick="askAI()">Ask AI</button>
-  <div id="response"></div>
+export default {
+  async fetch(request, env) {
+    // Replace this with your own AgentRouter API key
+    const API_KEY = "sk-ntuTTa7MPaMYYysTbBk5KZyOyUmy0RPSWUfhvVynmCrDaZ11";
 
-  <script>
-    async function askAI() {
-      const input = document.getElementById("userInput").value;
-      const responseDiv = document.getElementById("response");
+    // AgentRouter API endpoint
+    const targetURL = "https://seeflix-ai-proxy.rampolsrock.workers.dev/";
 
-      if (!input.trim()) {
-        responseDiv.textContent = "Please type something first!";
-        return;
-      }
+    try {
+      // Forward request body and headers to AgentRouter API
+      const response = await fetch(targetURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`,
+        },
+        body: await request.text(),
+      });
 
-      responseDiv.textContent = "Thinking... 🍿";
+      const data = await response.text();
+      return new Response(data, {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
 
-      try {
-        const res = await fetch("fetch("https://seeflix-ai-proxy.rampolsrock.workers.dev/", {
-", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "sk-ntuTTa7MPaMYYysTbBk5KZyOyUmy0RPSWUfhvVynmCrDaZ11"
-          },
-          body: JSON.stringify({
-            model: "gpt-4", // you can change model if available
-            messages: [
-              { role: "system", content: "You are a helpful movie recommendation assistant for SEEFLIX." },
-              { role: "user", content: input }
-            ]
-          })
-        });
-
-        const data = await res.json();
-        const reply = data.choices?.[0]?.message?.content || "No response.";
-        responseDiv.innerHTML = reply.replace(/\n/g, "<br>");
-      } catch (err) {
-        responseDiv.textContent = "Error: " + err.message;
-      }
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: "Proxy request failed", details: error.message }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
-  </script>
-</body>
-</html>
-
+  },
+};
