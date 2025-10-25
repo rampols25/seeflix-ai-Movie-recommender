@@ -4,5 +4,5 @@ compatibility_date = "2025-10-25"
 
 [vars]
 # This variable is optional (you can also set it in Cloudflare dashboard)
-AGENTROUTER_API_KEY = "your_api_key_here"
+AGENTROUTER_API_KEY = "sk-ntuTTa7MPaMYYysTbBk5KZyOyUmy0RPSWUfhvVynmCrDaZ11"
 
