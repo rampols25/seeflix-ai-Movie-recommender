@@ -1,9 +1,29 @@
 export default {
   async fetch(request, env) {
-    const API_KEY = "YOUR_AGENTROUTER_API_KEY";
+    // ✅ Store your AgentRouter API key in a Cloudflare environment variable (not in code!)
+    // In Cloudflare dashboard → Settings → Variables → Add secret (API_KEY)
+    const API_KEY = env.AGENTROUTER_API_KEY;
+
+    // ✅ Allow only your own domains (replace with your real domain or localhost for testing)
+    const ALLOWED_ORIGINS = [
+      "https://seeflix.net",     // your live domain
+      "https://seeflix.vercel.app", // if hosted on Vercel
+      "http://localhost:3000"    // local testing
+    ];
+
+    // Validate request origin
+    const origin = request.headers.get("Origin");
+    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized domain" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const BASE_URL = "https://api.agentrouter.org/v1";
     const url = new URL(request.url);
 
+    // Route handling
     let endpoint = "/chat/completions";
     if (url.pathname.startsWith("/image")) endpoint = "/images/generate";
     if (url.pathname.startsWith("/tools")) endpoint = "/tools";
@@ -21,18 +41,24 @@ export default {
       });
 
       const data = await response.text();
+
       return new Response(data, {
         status: response.status,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Origin": origin || "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
         },
       });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify({
+          error: "Proxy request failed",
+          details: error.message,
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
   },
 };
