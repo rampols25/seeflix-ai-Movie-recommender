@@ -1,3 +1,8 @@
-name = "agentrouter-proxy"
+name = "seeflix-ai-proxy"
 main = "worker.js"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-10-25"
+
+[vars]
+# This variable is optional (you can also set it in Cloudflare dashboard)
+AGENTROUTER_API_KEY = "your_api_key_here"
+
