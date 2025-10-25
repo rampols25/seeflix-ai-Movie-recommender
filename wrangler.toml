@@ -1,4 +1,4 @@
-name = "seeflix-ai-proxy"
+name = "seeflixaimovierecommender"
 main = "worker.js"
 compatibility_date = "2025-10-25"
 
